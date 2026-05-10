@@ -4,619 +4,364 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SmartyCrawler Tester</title>
-
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Google Font: IBM Plex Mono + Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: {
-              DEFAULT: '#1A3A6B',
-              light: '#2352A0',
-              dark: '#112548',
-              50: '#EEF3FB',
-            },
-            accent: {
-              DEFAULT: '#E8640A',
-              light: '#F47C2A',
-              dark: '#C0510A',
-            },
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            mono: ['IBM Plex Mono', 'monospace'],
-          },
-        },
-      },
-    };
-  </script>
-
   <style>
-    /* ── Base ─────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: #F4F6FA; color: #1A1F2E; }
-
-    /* ── Header gradient bar ──────────────────────────── */
-    .header-bar {
-      background: linear-gradient(135deg, #1A3A6B 0%, #2352A0 60%, #1A3A6B 100%);
-      border-bottom: 3px solid #E8640A;
-    }
-
-    /* ── Card ─────────────────────────────────────────── */
-    .card {
-      background: #ffffff;
-      border: 1px solid #DDE3EE;
-      border-radius: 12px;
-      box-shadow: 0 2px 16px rgba(26,58,107,0.06);
-    }
-
-    /* ── Textarea / Select / Input focus ring ─────────── */
-    .field {
-      background: #F8FAFD;
-      border: 1.5px solid #CBD5E8;
-      border-radius: 8px;
-      font-size: 14px;
-      transition: border-color .15s, box-shadow .15s;
-      outline: none;
-      width: 100%;
-      padding: 10px 14px;
-      font-family: 'IBM Plex Mono', monospace;
-      color: #1A1F2E;
-    }
-    .field:focus {
-      border-color: #2352A0;
-      box-shadow: 0 0 0 3px rgba(35,82,160,0.14);
-      background: #ffffff;
-    }
-    select.field { font-family: 'Inter', sans-serif; cursor: pointer; }
-
-    /* ── Primary button ───────────────────────────────── */
-    .btn-primary {
-      background: #E8640A;
-      color: #fff;
-      font-weight: 700;
-      font-size: 15px;
-      border: none;
-      border-radius: 8px;
-      padding: 12px 32px;
-      cursor: pointer;
-      transition: background .15s, transform .1s, box-shadow .15s;
-      letter-spacing: 0.01em;
-      box-shadow: 0 3px 12px rgba(232,100,10,0.28);
-    }
-    .btn-primary:hover { background: #C0510A; box-shadow: 0 4px 18px rgba(232,100,10,0.36); }
-    .btn-primary:active { transform: scale(0.98); }
-    .btn-primary:disabled { background: #A0A8B8; box-shadow: none; cursor: not-allowed; }
-
-    /* ── Table ────────────────────────────────────────── */
-    table { border-collapse: collapse; width: 100%; }
-    thead th {
-      background: #1A3A6B;
-      color: #ffffff;
-      font-weight: 600;
-      font-size: 12px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      padding: 10px 14px;
-      text-align: left;
-    }
-    thead th:first-child { border-radius: 8px 0 0 0; }
-    thead th:last-child  { border-radius: 0 8px 0 0; }
-    tbody tr { border-bottom: 1px solid #EEF1F8; transition: background .1s; }
-    tbody tr:hover { background: #F4F7FD; }
-    tbody td { padding: 11px 14px; font-size: 14px; vertical-align: middle; }
-    .td-artikel { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; color: #1A3A6B; }
-    .td-price    { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #1A1F2E; }
-
-    /* ── Status badges ────────────────────────────────── */
-    .badge {
-      display: inline-flex; align-items: center; gap: 5px;
-      border-radius: 20px; padding: 3px 10px; font-size: 12px; font-weight: 600;
-      white-space: nowrap;
-    }
-    .badge-pending  { background: #F0F2F8; color: #6B7A99; }
-    .badge-running  { background: #EBF2FF; color: #2352A0; }
-    .badge-done     { background: #E5F9EE; color: #1A7A42; }
-    .badge-error    { background: #FEE9E7; color: #C0250A; }
-
-    /* ── Spin animation ───────────────────────────────── */
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .spin { display: inline-block; animation: spin 0.8s linear infinite; }
-
-    /* ── Screenshot link ─────────────────────────────── */
-    .screenshot-link {
-      display: inline-flex; align-items: center; gap: 4px;
-      color: #2352A0; font-size: 12px; font-weight: 500;
-      text-decoration: none; transition: color .15s;
-    }
-    .screenshot-link:hover { color: #E8640A; text-decoration: underline; }
-
-    /* ── Error message ────────────────────────────────── */
-    .err-msg { font-size: 11px; color: #C0250A; margin-top: 3px; font-family: 'IBM Plex Mono', monospace; }
-
-    /* ── Counter pill ─────────────────────────────────── */
-    .counter-pill {
-      display: inline-block; background: rgba(232,100,10,0.14);
-      color: #E8640A; font-size: 11px; font-weight: 700;
-      border-radius: 20px; padding: 2px 8px; margin-left: 6px;
-    }
-
-    /* ── Section label ────────────────────────────────── */
-    .label { font-size: 12px; font-weight: 600; color: #5A6480; letter-spacing: 0.04em; margin-bottom: 6px; display: block; text-transform: uppercase; }
-
-    /* ── Empty state ─────────────────────────────────── */
-    .empty-state { text-align: center; padding: 48px 0; color: #9AA3BA; }
-    .empty-state svg { margin: 0 auto 12px; opacity: .35; display: block; }
-
-    /* ── Progress bar (global) ───────────────────────── */
-    #progress-bar-wrap { height: 3px; background: #EEF1F8; border-radius: 2px; overflow: hidden; margin-bottom: 20px; }
-    #progress-bar { height: 100%; width: 0%; background: #E8640A; transition: width .4s ease; border-radius: 2px; }
-
-    /* ── Divider ─────────────────────────────────────── */
-    .divider { height: 1px; background: #DDE3EE; margin: 0; }
+    body { font-size: 14px; }
+    .status-pending  { color: #6b7280; }
+    .status-running  { color: #2563eb; }
+    .status-done     { color: #16a34a; }
+    .status-error    { color: #dc2626; }
+    .spin { animation: spin 1s linear infinite; display: inline-block; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    table { border-collapse: collapse; }
+    .thumb { width: 80px; height: auto; cursor: pointer; border-radius: 4px; border: 1px solid #e5e7eb; transition: opacity 0.2s; }
+    .thumb:hover { opacity: 0.8; }
+    /* Modal */
+    #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 999; align-items: center; justify-content: center; }
+    #modal.open { display: flex; }
+    #modal img { max-width: 90vw; max-height: 90vh; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
   </style>
 </head>
-<body class="min-h-screen">
+<body class="bg-gray-50 min-h-screen">
 
-  <!-- ════════════════════════════════════════════════════ HEADER -->
-  <header class="header-bar px-6 py-5 flex items-center justify-between">
-    <div>
-      <div class="flex items-center gap-3">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <rect width="28" height="28" rx="7" fill="#E8640A"/>
-          <path d="M7 14.5L11.5 19L21 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <h1 class="text-white text-xl font-extrabold tracking-tight">SmartyCrawler Tester</h1>
+  <!-- Modal für Screenshot-Vollansicht -->
+  <div id="modal" onclick="closeModal()">
+    <img id="modal-img" src="" alt="Screenshot" />
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 py-8">
+
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-center gap-3 mb-1">
+        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-900">SmartyCrawler Tester</h1>
       </div>
-      <p class="text-blue-200 text-sm mt-0.5 ml-10" style="color:#9BB8E8;">Artikel-Nummern abfragen &amp; Preise vergleichen</p>
+      <p class="text-gray-500 text-sm ml-11">Stakis Preis – Artikelnummern abfragen</p>
     </div>
-    <div class="hidden sm:flex items-center gap-2 text-xs font-mono" style="color:#9BB8E8;">
-      <span id="api-indicator" class="w-2 h-2 rounded-full bg-green-400 inline-block"></span>
-      <span>smartycrawler.vercel.app</span>
-    </div>
-  </header>
 
-  <!-- ════════════════════════════════════════════════════ MAIN -->
-  <main class="max-w-6xl mx-auto px-4 py-8">
-
-    <!-- ── INPUT CARD ───────────────────────────────────── -->
-    <div class="card p-6 mb-6">
-      <h2 class="text-base font-bold text-primary mb-5 flex items-center gap-2">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="14" rx="3" stroke="#1A3A6B" stroke-width="1.8"/><path d="M6 9h6M9 6v6" stroke="#1A3A6B" stroke-width="1.8" stroke-linecap="round"/></svg>
-        Abfrage konfigurieren
-      </h2>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Artikel textarea -->
-        <div class="lg:col-span-1">
-          <label class="label" for="artikel-input">Artikel-Nummern</label>
-          <textarea
-            id="artikel-input"
-            class="field"
-            rows="10"
-            placeholder="Eine Nummer pro Zeile&#10;oder kommagetrennt&#10;&#10;Beispiel:&#10;04E 103 469 T&#10;06A 103 469 AX&#10;1K0 407 271 F"
-          ></textarea>
-          <p class="text-xs mt-1.5" style="color:#9AA3BA;">Leerzeilen werden ignoriert</p>
-        </div>
-
-        <!-- Settings + button -->
-        <div class="lg:col-span-2 flex flex-col gap-5">
-          <!-- Job / Lieferant -->
-          <div>
-            <label class="label" for="job-select">Job / Lieferant</label>
-            <select id="job-select" class="field">
-              <option value="stakis-preis">Stakis — Preis &amp; Verfügbarkeit</option>
-              <option value="autodoc-preis">Autodoc — Preis &amp; Verfügbarkeit</option>
-              <option value="teilekontor-preis">Teilekontor — Preis &amp; Verfügbarkeit</option>
-            </select>
-          </div>
-
-          <!-- Kunde -->
-          <div>
-            <label class="label" for="customer-select">Kunde</label>
-            <select id="customer-select" class="field">
-              <option value="cmp02d88g000004l10ihhyffv">Testkunde</option>
-            </select>
-          </div>
-
-          <!-- Info box -->
-          <div class="rounded-lg p-4 flex gap-3 text-sm" style="background:#EEF3FB; color:#2352A0;">
-            <svg class="shrink-0 mt-0.5" width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#2352A0" stroke-width="1.5"/><path d="M8 7v4M8 5.5v.5" stroke="#2352A0" stroke-width="1.5" stroke-linecap="round"/></svg>
-            <span>Alle Jobs werden <strong>parallel</strong> gestartet. Der Status wird alle 3 Sekunden automatisch aktualisiert.</span>
-          </div>
-
-          <div class="flex-1"></div>
-
-          <!-- Submit button -->
-          <div class="flex items-center gap-4 flex-wrap">
-            <button id="submit-btn" class="btn-primary flex items-center gap-2">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9h12M10 5l4 4-4 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              Abfragen starten
-            </button>
-            <button id="clear-btn" class="text-sm font-medium px-4 py-2 rounded-lg border transition-colors hidden" style="border-color:#CBD5E8; color:#5A6480;" onmouseover="this.style.background='#F0F2F8'" onmouseout="this.style.background='transparent'">
-              Tabelle leeren
-            </button>
-            <span id="job-summary" class="text-sm hidden" style="color:#5A6480;"></span>
-          </div>
-        </div>
+    <!-- Input -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        Artikelnummern <span class="text-gray-400 font-normal">(eine pro Zeile)</span>
+      </label>
+      <textarea
+        id="artikel-input"
+        rows="5"
+        placeholder="OC47&#10;F026407&#10;1457434310"
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
+      ></textarea>
+      <div class="flex items-center gap-4 mt-4">
+        <button
+          id="start-btn"
+          onclick="startAbfragen()"
+          class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium px-5 py-2 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Abfragen starten
+        </button>
+        <button
+          id="clear-btn"
+          onclick="clearResults()"
+          class="text-gray-500 hover:text-gray-700 text-sm px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+        >
+          Zurücksetzen
+        </button>
+        <span id="progress-text" class="text-sm text-gray-500 ml-auto"></span>
       </div>
     </div>
 
-    <!-- ── RESULTS CARD ──────────────────────────────────── -->
-    <div class="card overflow-hidden">
-      <div class="px-6 py-4 flex items-center justify-between" style="background:#F8FAFD; border-bottom:1px solid #DDE3EE;">
-        <h2 class="text-base font-bold text-primary flex items-center">
-          Ergebnisse
-          <span id="result-count" class="counter-pill hidden">0</span>
-        </h2>
-        <div id="polling-indicator" class="hidden flex items-center gap-2 text-xs font-medium" style="color:#2352A0;">
-          <span class="spin">⟳</span> Aktualisiere…
-        </div>
+    <!-- Ergebnis-Tabelle -->
+    <div id="results-container" class="hidden bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h2 class="font-semibold text-gray-800">Ergebnisse</h2>
+        <span id="result-count" class="text-sm text-gray-500"></span>
       </div>
-
-      <!-- Progress bar -->
-      <div id="progress-bar-wrap" class="hidden px-0 mx-0" style="border-radius:0; margin-bottom:0;">
-        <div id="progress-bar"></div>
-      </div>
-
-      <!-- Table -->
       <div class="overflow-x-auto">
-        <table id="results-table">
+        <table class="w-full text-sm">
           <thead>
-            <tr>
-              <th style="width:44px">#</th>
-              <th>Suchnummer</th>
-              <th>Hersteller</th>
-              <th>Artikelnummer</th>
-              <th>Status</th>
-              <th>EK (Netto)</th>
-              <th>VK (Brutto)</th>
-              <th>Lieferzeit</th>
-              <th>Screenshot</th>
+            <tr class="bg-gray-50 border-b border-gray-200">
+              <th class="text-left px-4 py-3 font-medium text-gray-600 w-10">#</th>
+              <th class="text-left px-4 py-3 font-medium text-gray-600">Suchnummer</th>
+              <th class="text-left px-4 py-3 font-medium text-gray-600">Hersteller</th>
+              <th class="text-left px-4 py-3 font-medium text-gray-600">Artikelnummer</th>
+              <th class="text-right px-4 py-3 font-medium text-gray-600">EK</th>
+              <th class="text-right px-4 py-3 font-medium text-gray-600">VK</th>
+              <th class="text-left px-4 py-3 font-medium text-gray-600">Lieferzeit</th>
+              <th class="text-center px-4 py-3 font-medium text-gray-600">Screenshot</th>
             </tr>
           </thead>
-          <tbody id="results-body">
-            <!-- Empty state -->
-            <tr id="empty-row">
-              <td colspan="9" class="empty-state">
-                <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                  <rect x="8" y="12" width="32" height="28" rx="4" stroke="#9AA3BA" stroke-width="2"/>
-                  <path d="M16 20h16M16 26h10" stroke="#9AA3BA" stroke-width="2" stroke-linecap="round"/>
-                  <circle cx="36" cy="12" r="6" fill="#CBD5E8"/>
-                  <path d="M33 12h6M36 9v6" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-                <p class="font-semibold">Noch keine Abfragen</p>
-                <p class="text-sm mt-1" style="color:#B0BAD0;">Artikel-Nummern eingeben und "Abfragen starten" klicken</p>
-              </td>
-            </tr>
-          </tbody>
+          <tbody id="result-tbody"></tbody>
         </table>
       </div>
     </div>
 
-  </main>
+  </div>
 
-  <!-- ════════════════════════════════════════════════════ JS -->
   <script>
-    // ── CONFIG ─────────────────────────────────────────────────
-    const API_BASE   = 'https://smartycrawler.vercel.app/api';
-    const API_KEY    = 'smartycrawler-api-secret-2024';
-    const POLL_MS    = 3000;
+    const API_BASE     = 'https://smartycrawler.vercel.app';
+    const API_KEY      = 'smartycrawler-api-secret-2024';
+    const SKILL        = 'stakis-preis';
+    const CUSTOMER_ID  = 'cmp02d88g000004l10ihhyffv';
+    const POLL_MS      = 3000;
 
-    // ── STATE ──────────────────────────────────────────────────
-    let jobs      = [];   // { id, artikel, runId, status, result, error }
-    let pollTimer = null;
+    let jobs = {};          // runId → { artikel, rowGroupStart }
+    let pollIntervals = {}; // runId → intervalId
+    let totalJobs = 0;
+    let doneJobs  = 0;
+    let globalRowIndex = 0; // laufende Zeilennummer (je Suchnummer)
 
-    // ── ELEMENTS ───────────────────────────────────────────────
-    const submitBtn     = document.getElementById('submit-btn');
-    const clearBtn      = document.getElementById('clear-btn');
-    const artikelInput  = document.getElementById('artikel-input');
-    const jobSelect     = document.getElementById('job-select');
-    const customerSel   = document.getElementById('customer-select');
-    const resultsBody   = document.getElementById('results-body');
-    const emptyRow      = document.getElementById('empty-row');
-    const resultCount   = document.getElementById('result-count');
-    const pollingInd    = document.getElementById('polling-indicator');
-    const progressWrap  = document.getElementById('progress-bar-wrap');
-    const progressBar   = document.getElementById('progress-bar');
-    const jobSummary    = document.getElementById('job-summary');
+    // ── Hilfsfunktionen ──────────────────────────────────────────────────────
 
-    // ── HELPERS ────────────────────────────────────────────────
-    function parseArtikel(raw) {
-      return raw
-        .split(/[\n,]+/)
-        .map(s => s.trim())
-        .filter(Boolean);
-    }
-
-    function statusBadge(job) {
-      switch (job.status) {
-        case 'pending':
-          return `<span class="badge badge-pending">⏳ Wartend</span>`;
-        case 'running':
-          return `<span class="badge badge-running"><span class="spin" style="font-size:11px;">⟳</span> Läuft</span>`;
-        case 'done':
-          return `<span class="badge badge-done">✅ Fertig</span>`;
-        case 'error':
-          return `<span class="badge badge-error">❌ Fehler</span>`;
-        default:
-          return `<span class="badge badge-pending">${job.status}</span>`;
-      }
-    }
-
-    function fmt(val, fallback = '—') {
-      if (val === null || val === undefined || val === '') return fallback;
-      return val;
-    }
-
-    function fmtPrice(val) {
-      if (val === null || val === undefined || val === '') return '—';
-      const n = parseFloat(val);
-      if (isNaN(n)) return String(val);
-      return n.toFixed(2).replace('.', ',') + ' €';
-    }
-
-    function screenshotCell(job) {
-      // Screenshot URL korrekt zusammenbauen
-      const rawUrl = job.screenshotUrl || job.result?.screenshotUrl || job.result?.screenshot_url || null;
-      const BASE = 'https://smartycrawler.vercel.app';
-      const url = rawUrl
-        ? (rawUrl.startsWith('http') ? rawUrl : `${BASE}${rawUrl}`)
-        : null;
-      if (!url) return '—';
-      return `<a href="${escHtml(url)}" target="_blank" rel="noopener" title="Screenshot öffnen">
-        <img src="${escHtml(url)}" style="max-width:90px;max-height:60px;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;display:block;" onerror="this.outerHTML='<span style=\'color:#94a3b8\'>n/v</span>'" />
-      </a>`;
-    }
-
-    function escHtml(s) {
-      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    function setBtn(loading) {
+      const btn = document.getElementById('start-btn');
+      btn.disabled = loading;
+      btn.textContent = loading ? 'Läuft…' : 'Abfragen starten';
     }
 
     function updateProgress() {
-      const total    = jobs.length;
-      const finished = jobs.filter(j => j.status === 'done' || j.status === 'error').length;
-      const pct      = total > 0 ? Math.round((finished / total) * 100) : 0;
-      progressBar.style.width = pct + '%';
+      document.getElementById('progress-text').textContent =
+        totalJobs > 0 ? `${doneJobs} / ${totalJobs} fertig` : '';
     }
 
-    // ── RENDER TABLE ───────────────────────────────────────────
-    function renderTable() {
-      if (jobs.length === 0) {
-        resultsBody.innerHTML = '';
-        resultsBody.appendChild(emptyRow);
-        resultCount.classList.add('hidden');
-        clearBtn.classList.add('hidden');
-        progressWrap.classList.add('hidden');
-        jobSummary.classList.add('hidden');
+    function openModal(src) {
+      document.getElementById('modal-img').src = src;
+      document.getElementById('modal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('open');
+    }
+
+    function clearResults() {
+      document.getElementById('result-tbody').innerHTML = '';
+      document.getElementById('results-container').classList.add('hidden');
+      document.getElementById('result-count').textContent = '';
+      document.getElementById('progress-text').textContent = '';
+      Object.values(pollIntervals).forEach(clearInterval);
+      pollIntervals = {};
+      jobs = {};
+      totalJobs = 0;
+      doneJobs  = 0;
+      globalRowIndex = 0;
+      setBtn(false);
+    }
+
+    // ── Zeilen in Tabelle ────────────────────────────────────────────────────
+
+    function addPendingRow(artikel, idx) {
+      const tbody = document.getElementById('result-tbody');
+      const tr = document.createElement('tr');
+      tr.id = `row-pending-${idx}`;
+      tr.className = 'border-b border-gray-100';
+      tr.innerHTML = `
+        <td class="px-4 py-3 text-gray-400">${idx}</td>
+        <td class="px-4 py-3 font-mono text-gray-700">${escHtml(artikel)}</td>
+        <td colspan="5" class="px-4 py-3 text-gray-400 status-running">
+          <span class="spin">⟳</span> wird abgefragt…
+        </td>
+        <td class="px-4 py-3"></td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    function replacePendingRow(artikel, idx, treffer, screenshotUrl) {
+      // Platzhalter-Zeile entfernen
+      const placeholder = document.getElementById(`row-pending-${idx}`);
+      if (placeholder) placeholder.remove();
+
+      const tbody = document.getElementById('result-tbody');
+
+      if (!treffer || treffer.length === 0) {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-gray-100';
+        tr.innerHTML = `
+          <td class="px-4 py-3 text-gray-500">${idx}</td>
+          <td class="px-4 py-3 font-mono text-gray-700">${escHtml(artikel)}</td>
+          <td colspan="5" class="px-4 py-3 text-gray-400 italic">Keine Treffer</td>
+          <td class="px-4 py-3 text-center">
+            ${screenshotUrl ? screenshotThumb(screenshotUrl) : ''}
+          </td>
+        `;
+        tbody.appendChild(tr);
         return;
       }
 
-      emptyRow.remove();
-      resultCount.textContent = jobs.length;
-      resultCount.classList.remove('hidden');
-      clearBtn.classList.remove('hidden');
-      progressWrap.classList.remove('hidden');
+      treffer.forEach((t, i) => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-gray-100 hover:bg-gray-50';
 
-      // Rebuild rows (update in-place by data-id to avoid scroll jump)
-      // Remove old rows for jobs that will be re-rendered
-      jobs.forEach((job, idx) => {
-        // Remove all existing rows for this job
-        resultsBody.querySelectorAll(`tr[data-id="${job.id}"]`).forEach(r => r.remove());
+        const isFirst = i === 0;
+        const imgHtml = isFirst && screenshotUrl ? screenshotThumb(screenshotUrl) : '';
 
-        const r = job.result || {};
-        const hasTreffer = Array.isArray(r.treffer) && r.treffer.length > 0;
-        const rowBg = idx % 2 === 0 ? '' : 'style="background:#F8FAFD;"';
-
-        if (hasTreffer) {
-          // Multiple rows: one per hit
-          r.treffer.forEach((treffer, ti) => {
-            const row = document.createElement('tr');
-            row.dataset.id = job.id;
-            if (idx % 2 !== 0) row.style.background = '#F8FAFD';
-            const ek = fmtPrice(treffer.ek);
-            const vk = fmtPrice(treffer.vk);
-            const lt = fmt(treffer.lieferzeit);
-            row.innerHTML = `
-              <td class="text-center text-xs font-mono" style="color:#9AA3BA;">${ti === 0 ? idx + 1 : ''}</td>
-              <td class="td-artikel">${ti === 0 ? escHtml(job.artikel) : ''}</td>
-              <td class="text-sm">${escHtml(treffer.hersteller || '—')}</td>
-              <td class="td-artikel" style="font-size:12px;">${escHtml(treffer.artNr || '—')}</td>
-              <td>${ti === 0 ? statusBadge(job) : ''}</td>
-              <td class="td-price">${ek}</td>
-              <td class="td-price">${vk}</td>
-              <td class="text-sm" style="color:#3A4460;">${lt}</td>
-              <td>${ti === 0 ? screenshotCell(job) : ''}</td>
-            `;
-            resultsBody.appendChild(row);
-          });
-        } else {
-          // Single row: old format or pending/error
-          const row = document.createElement('tr');
-          row.dataset.id = job.id;
-          if (idx % 2 !== 0) row.style.background = '#F8FAFD';
-          const ek  = fmtPrice(r.ek  ?? r.purchase_price ?? r.price_net  ?? r.preis_netto ?? null);
-          const vk  = fmtPrice(r.vk  ?? r.sell_price     ?? r.price_gross ?? r.preis_brutto ?? null);
-          const lt  = fmt(r.lieferzeit ?? r.delivery_time ?? r.availability ?? null);
-          row.innerHTML = `
-            <td class="text-center text-xs font-mono" style="color:#9AA3BA;">${idx + 1}</td>
-            <td class="td-artikel">${escHtml(job.artikel)}</td>
-            <td>—</td>
-            <td>—</td>
-            <td>
-              ${statusBadge(job)}
-              ${job.error ? `<div class="err-msg">${escHtml(job.error)}</div>` : ''}
-            </td>
-            <td class="td-price">${ek}</td>
-            <td class="td-price">${vk}</td>
-            <td class="text-sm" style="color:#3A4460;">${lt}</td>
-            <td>${screenshotCell(job)}</td>
-          `;
-          resultsBody.appendChild(row);
-        }
+        tr.innerHTML = `
+          <td class="px-4 py-3 text-gray-500">${isFirst ? idx : ''}</td>
+          <td class="px-4 py-3 font-mono text-gray-700">${isFirst ? escHtml(artikel) : ''}</td>
+          <td class="px-4 py-3 font-medium text-gray-800">${escHtml(t.hersteller || '')}</td>
+          <td class="px-4 py-3 font-mono text-gray-600">${escHtml(t.artNr || '')}</td>
+          <td class="px-4 py-3 text-right text-gray-800">${escHtml(t.ek || '')}</td>
+          <td class="px-4 py-3 text-right font-medium text-green-700">${escHtml(t.vk || '')}</td>
+          <td class="px-4 py-3 text-gray-600">${escHtml(t.lieferzeit || '')}</td>
+          <td class="px-4 py-3 text-center">${imgHtml}</td>
+        `;
+        tbody.appendChild(tr);
       });
-
-      updateProgress();
-
-      // Summary
-      const done  = jobs.filter(j => j.status === 'done').length;
-      const errs  = jobs.filter(j => j.status === 'error').length;
-      const total = jobs.length;
-      if (done + errs === total && total > 0) {
-        jobSummary.textContent = `${done} erfolgreich, ${errs} Fehler`;
-        jobSummary.classList.remove('hidden');
-      }
     }
 
-    // ── POLLING ────────────────────────────────────────────────
-    function activePollJobs() {
-      return jobs.filter(j => j.status === 'running' || j.status === 'pending');
+    function replaceWithError(artikel, idx, msg) {
+      const placeholder = document.getElementById(`row-pending-${idx}`);
+      if (placeholder) placeholder.remove();
+
+      const tbody = document.getElementById('result-tbody');
+      const tr = document.createElement('tr');
+      tr.className = 'border-b border-gray-100';
+      tr.innerHTML = `
+        <td class="px-4 py-3 text-gray-500">${idx}</td>
+        <td class="px-4 py-3 font-mono text-gray-700">${escHtml(artikel)}</td>
+        <td colspan="6" class="px-4 py-3 text-red-500 italic">${escHtml(msg)}</td>
+      `;
+      tbody.appendChild(tr);
     }
 
-    async function pollJob(job) {
-      if (!job.runId) return;
-      try {
-        const res = await fetch(`${API_BASE}/jobs/${job.runId}`, {
-          headers: { 'Authorization': `Bearer ${API_KEY}` }
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-
-        const s = (data.status || '').toLowerCase();
-        if (s === 'completed' || s === 'done' || s === 'success' || s === 'finished') {
-          job.status = 'done';
-          job.result = data.result ?? data.output ?? data.data ?? data ?? {};
-          job.screenshotUrl = data.screenshotUrl || null;
-        } else if (s === 'failed' || s === 'error') {
-          job.status = 'error';
-          job.error  = data.error || data.message || 'Unbekannter Fehler';
-        } else if (s === 'running' || s === 'processing' || s === 'in_progress') {
-          job.status = 'running';
-        }
-        // else still pending / queued → keep as running
-      } catch (e) {
-        // transient error → keep running, don't fail yet
-        console.warn('Poll error for', job.runId, e);
-      }
+    function screenshotThumb(screenshotUrl) {
+      const fullUrl = `${API_BASE}${screenshotUrl}`;
+      return `<img
+        class="thumb"
+        src="${fullUrl}"
+        alt="Screenshot"
+        onclick="openModal('${fullUrl}')"
+        title="Screenshot anzeigen"
+      />`;
     }
 
-    async function pollAll() {
-      const active = activePollJobs();
-      if (active.length === 0) {
-        clearInterval(pollTimer);
-        pollTimer = null;
-        pollingInd.classList.add('hidden');
-        renderTable();
-        return;
-      }
-
-      pollingInd.classList.remove('hidden');
-      await Promise.all(active.map(pollJob));
-      renderTable();
-
-      if (activePollJobs().length === 0) {
-        clearInterval(pollTimer);
-        pollTimer = null;
-        pollingInd.classList.add('hidden');
-      }
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
     }
 
-    // ── SUBMIT ─────────────────────────────────────────────────
-    async function startJob(artikel, skillSlug, customerId) {
-      const res = await fetch(`${API_BASE}/jobs/run`, {
+    // ── API-Aufrufe ──────────────────────────────────────────────────────────
+
+    async function createJob(artikel) {
+      const res = await fetch(`${API_BASE}/api/jobs/run`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${API_KEY}`,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          skillSlug,
-          customerId,
-          params: { artikel },
-        }),
+          skillSlug: SKILL,
+          customerId: CUSTOMER_ID,
+          params: { artikel }
+        })
       });
-      if (!res.ok) {
-        const text = await res.text().catch(() => '');
-        throw new Error(`HTTP ${res.status}${text ? ': ' + text.slice(0, 120) : ''}`);
-      }
-      return res.json();
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json(); // { run_id, status }
     }
 
-    submitBtn.addEventListener('click', async () => {
-      const artikelList = parseArtikel(artikelInput.value);
-      if (artikelList.length === 0) {
-        artikelInput.focus();
-        artikelInput.style.borderColor = '#E8640A';
-        setTimeout(() => { artikelInput.style.borderColor = ''; }, 1500);
-        return;
-      }
+    async function pollJob(runId) {
+      const res = await fetch(`${API_BASE}/api/jobs/${runId}`, {
+        headers: { 'Authorization': `Bearer ${API_KEY}` }
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      return {
+        status:        data.status,
+        screenshotUrl: data.screenshotUrl,
+        treffer:       data.result?.treffer || [],
+        artikel:       data.result?.artikel || ''
+      };
+    }
 
-      const skillSlug  = jobSelect.value;
-      const customerId = customerSel.value;
+    // ── Hauptlogik ───────────────────────────────────────────────────────────
 
-      // Stop existing poll
-      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    async function startAbfragen() {
+      const raw = document.getElementById('artikel-input').value.trim();
+      if (!raw) return;
 
-      // Init jobs
-      jobs = artikelList.map((a, i) => ({
-        id:      i,
-        artikel: a,
-        runId:   null,
-        status:  'pending',
-        result:  null,
-        error:   null,
-      }));
+      const artikels = raw.split('\n').map(s => s.trim()).filter(Boolean);
+      if (artikels.length === 0) return;
 
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `<span class="spin">⟳</span> Starte Jobs…`;
-      jobSummary.classList.add('hidden');
-      renderTable();
+      clearResults();
 
-      // Fire all jobs in parallel
-      await Promise.all(jobs.map(async job => {
+      totalJobs = artikels.length;
+      doneJobs  = 0;
+      updateProgress();
+      setBtn(true);
+
+      document.getElementById('results-container').classList.remove('hidden');
+      updateResultCount();
+
+      // Alle Jobs parallel starten
+      artikels.forEach(async (artikel, i) => {
+        const idx = i + 1;
+        addPendingRow(artikel, idx);
+
+        let runId;
         try {
-          const data = await startJob(job.artikel, skillSlug, customerId);
-          job.runId  = data.run_id ?? data.runId ?? data.id ?? null;
-          job.status = 'running';
-        } catch (e) {
-          job.status = 'error';
-          job.error  = e.message || 'Start fehlgeschlagen';
+          const job = await createJob(artikel);
+          runId = job.run_id;
+        } catch (err) {
+          replaceWithError(artikel, idx, `Job-Erstellung fehlgeschlagen: ${err.message}`);
+          doneJobs++;
+          updateProgress();
+          checkAllDone();
+          return;
         }
-      }));
 
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9h12M10 5l4 4-4 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Abfragen starten`;
+        // Polling starten
+        const iv = setInterval(async () => {
+          try {
+            const result = await pollJob(runId);
 
-      renderTable();
+            if (result.status === 'done') {
+              clearInterval(iv);
+              delete pollIntervals[runId];
+              replacePendingRow(artikel, idx, result.treffer, result.screenshotUrl);
+              doneJobs++;
+              updateProgress();
+              updateResultCount();
+              checkAllDone();
+            } else if (result.status === 'error' || result.status === 'failed') {
+              clearInterval(iv);
+              delete pollIntervals[runId];
+              replaceWithError(artikel, idx, `Job fehlgeschlagen (Status: ${result.status})`);
+              doneJobs++;
+              updateProgress();
+              checkAllDone();
+            }
+            // pending/running → weiter pollen
+          } catch (err) {
+            clearInterval(iv);
+            delete pollIntervals[runId];
+            replaceWithError(artikel, idx, `Polling-Fehler: ${err.message}`);
+            doneJobs++;
+            updateProgress();
+            checkAllDone();
+          }
+        }, POLL_MS);
 
-      // Start polling
-      if (activePollJobs().length > 0) {
-        pollTimer = setInterval(pollAll, POLL_MS);
+        pollIntervals[runId] = iv;
+      });
+    }
+
+    function checkAllDone() {
+      if (doneJobs >= totalJobs) {
+        setBtn(false);
       }
-    });
+    }
 
-    // ── CLEAR ──────────────────────────────────────────────────
-    clearBtn.addEventListener('click', () => {
-      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-      jobs = [];
-      pollingInd.classList.add('hidden');
-      // Re-attach empty row
-      resultsBody.innerHTML = '';
-      resultsBody.appendChild(emptyRow);
-      resultCount.classList.add('hidden');
-      clearBtn.classList.add('hidden');
-      progressWrap.classList.add('hidden');
-      jobSummary.classList.add('hidden');
-      progressBar.style.width = '0%';
-    });
+    function updateResultCount() {
+      const rows = document.querySelectorAll('#result-tbody tr').length;
+      document.getElementById('result-count').textContent =
+        rows > 0 ? `${rows} Zeile${rows !== 1 ? 'n' : ''}` : '';
+    }
   </script>
+
 </body>
 </html>
