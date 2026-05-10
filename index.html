@@ -365,7 +365,10 @@
     }
 
     function screenshotCell(job) {
-      const url = job.result?.screenshotUrl || job.result?.screenshot_url || job.result?.screenshot || null;
+      // Screenshot kommt direkt vom API-Endpoint
+      const url = job.screenshotUrl
+        ? (job.screenshotUrl.startsWith('http') ? job.screenshotUrl : `${API_BASE}${job.screenshotUrl}`)
+        : (job.result?.screenshotUrl || job.result?.screenshot_url || null);
       if (!url) return '—';
       return `<a class="screenshot-link" href="${escHtml(url)}" target="_blank" rel="noopener">
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="1" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M4 7l2-2 2 2 1.5-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
