@@ -494,6 +494,7 @@
         if (s === 'completed' || s === 'done' || s === 'success' || s === 'finished') {
           job.status = 'done';
           job.result = data.result ?? data.output ?? data.data ?? data ?? {};
+          job.screenshotUrl = data.screenshotUrl || null;
         } else if (s === 'failed' || s === 'error') {
           job.status = 'error';
           job.error  = data.error || data.message || 'Unbekannter Fehler';
