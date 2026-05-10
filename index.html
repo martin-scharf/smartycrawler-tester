@@ -273,7 +273,9 @@
           <thead>
             <tr>
               <th style="width:44px">#</th>
-              <th>Artikel-Nummer</th>
+              <th>Suchnummer</th>
+              <th>Hersteller</th>
+              <th>Artikelnummer</th>
               <th>Status</th>
               <th>EK (Netto)</th>
               <th>VK (Brutto)</th>
@@ -284,7 +286,7 @@
           <tbody id="results-body">
             <!-- Empty state -->
             <tr id="empty-row">
-              <td colspan="7" class="empty-state">
+              <td colspan="9" class="empty-state">
                 <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
                   <rect x="8" y="12" width="32" height="28" rx="4" stroke="#9AA3BA" stroke-width="2"/>
                   <path d="M16 20h16M16 26h10" stroke="#9AA3BA" stroke-width="2" stroke-linecap="round"/>
@@ -401,31 +403,61 @@
       progressWrap.classList.remove('hidden');
 
       // Rebuild rows (update in-place by data-id to avoid scroll jump)
+      // Remove old rows for jobs that will be re-rendered
       jobs.forEach((job, idx) => {
-        let row = resultsBody.querySelector(`tr[data-id="${job.id}"]`);
-        if (!row) {
-          row = document.createElement('tr');
-          row.dataset.id = job.id;
-          resultsBody.appendChild(row);
-        }
+        // Remove all existing rows for this job
+        resultsBody.querySelectorAll(`tr[data-id="${job.id}"]`).forEach(r => r.remove());
 
         const r = job.result || {};
-        const ek  = fmtPrice(r.ek  ?? r.purchase_price ?? r.price_net  ?? r.preis_netto ?? null);
-        const vk  = fmtPrice(r.vk  ?? r.sell_price     ?? r.price_gross ?? r.preis_brutto ?? null);
-        const lt  = fmt(r.lieferzeit ?? r.delivery_time ?? r.availability ?? null);
+        const hasTreffer = Array.isArray(r.treffer) && r.treffer.length > 0;
+        const rowBg = idx % 2 === 0 ? '' : 'style="background:#F8FAFD;"';
 
-        row.innerHTML = `
-          <td class="text-center text-xs font-mono" style="color:#9AA3BA;">${idx + 1}</td>
-          <td class="td-artikel">${escHtml(job.artikel)}</td>
-          <td>
-            ${statusBadge(job)}
-            ${job.error ? `<div class="err-msg">${escHtml(job.error)}</div>` : ''}
-          </td>
-          <td class="td-price">${ek}</td>
-          <td class="td-price">${vk}</td>
-          <td class="text-sm" style="color:#3A4460;">${lt}</td>
-          <td>${screenshotCell(job)}</td>
-        `;
+        if (hasTreffer) {
+          // Multiple rows: one per hit
+          r.treffer.forEach((treffer, ti) => {
+            const row = document.createElement('tr');
+            row.dataset.id = job.id;
+            if (idx % 2 !== 0) row.style.background = '#F8FAFD';
+            const ek = fmtPrice(treffer.ek);
+            const vk = fmtPrice(treffer.vk);
+            const lt = fmt(treffer.lieferzeit);
+            row.innerHTML = `
+              <td class="text-center text-xs font-mono" style="color:#9AA3BA;">${ti === 0 ? idx + 1 : ''}</td>
+              <td class="td-artikel">${ti === 0 ? escHtml(job.artikel) : ''}</td>
+              <td class="text-sm">${escHtml(treffer.hersteller || '—')}</td>
+              <td class="td-artikel" style="font-size:12px;">${escHtml(treffer.artNr || '—')}</td>
+              <td>${ti === 0 ? statusBadge(job) : ''}</td>
+              <td class="td-price">${ek}</td>
+              <td class="td-price">${vk}</td>
+              <td class="text-sm" style="color:#3A4460;">${lt}</td>
+              <td>${ti === 0 ? screenshotCell(job) : ''}</td>
+            `;
+            resultsBody.appendChild(row);
+          });
+        } else {
+          // Single row: old format or pending/error
+          const row = document.createElement('tr');
+          row.dataset.id = job.id;
+          if (idx % 2 !== 0) row.style.background = '#F8FAFD';
+          const ek  = fmtPrice(r.ek  ?? r.purchase_price ?? r.price_net  ?? r.preis_netto ?? null);
+          const vk  = fmtPrice(r.vk  ?? r.sell_price     ?? r.price_gross ?? r.preis_brutto ?? null);
+          const lt  = fmt(r.lieferzeit ?? r.delivery_time ?? r.availability ?? null);
+          row.innerHTML = `
+            <td class="text-center text-xs font-mono" style="color:#9AA3BA;">${idx + 1}</td>
+            <td class="td-artikel">${escHtml(job.artikel)}</td>
+            <td>—</td>
+            <td>—</td>
+            <td>
+              ${statusBadge(job)}
+              ${job.error ? `<div class="err-msg">${escHtml(job.error)}</div>` : ''}
+            </td>
+            <td class="td-price">${ek}</td>
+            <td class="td-price">${vk}</td>
+            <td class="text-sm" style="color:#3A4460;">${lt}</td>
+            <td>${screenshotCell(job)}</td>
+          `;
+          resultsBody.appendChild(row);
+        }
       });
 
       updateProgress();
